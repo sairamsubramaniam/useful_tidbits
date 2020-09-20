@@ -77,8 +77,8 @@ def make_final_lists(batch_size, max_events_to_sqs, batch_num, split_by):
 
 
 
-batch_size = 7397
-max_events_to_sqs = 23
+batch_size = 525
+max_events_to_sqs = 500
 batch_num = 1
 split_by = 2
 
@@ -89,6 +89,9 @@ new_result = make_final_lists(batch_size=batch_size,
                               batch_num=batch_num, 
                               split_by=split_by)
 
+
+for k in new_result:
+    print(k)
 
 s = 0
 for k in new_result:
