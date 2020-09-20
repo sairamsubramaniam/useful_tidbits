@@ -1,0 +1,205 @@
+TABLE: employees
+
+---------|-----------------------|---------|
+employee | work_order_start_time | site_id |
+---------|-----------------------|---------|
+Gautham  | 2020-01-01 21:20:52   | 2345    |
+Geet     | 2020-01-01 23:30:12   | 5536    |
+Gautham  | 2020-01-02 13:30:10   | 1345    |
+Geet     | 2020-01-05 13:30:10   | 7721    |
+Geet     | 2020-01-05 21:20:52   | 5536    |
+Geet     | 2020-01-10 09:30:22   | 7721    |
+Gangamma | 2020-01-11 13:30:10   | 7721    |
+Gautham  | 2020-01-16 09:30:22   | 7721    |
+Gangamma | 2020-01-21 21:20:52   | 5536    |
+Gangamma | 2020-01-31 09:30:22   | 1345    |
+---------|-----------------------|---------|
+
+
+**************************************** QUESTIONS *****************************************
+
+LEVEL - VERY EASY:
+
+Write a query to get a list of customers, who have started more than 3 work orders.
+
+Result:
+employee| work_order_count
+Geet    | 3
+
+
+
+LEVEL - EASY:
+
+Write a query to find the percentage share of work_orders started by each employee in Jan 2020.
+
+Result:
+employee
+Geet     | 40%
+Gautham  | 30%
+Gangamma | 30%
+
+
+
+LEVEL - MEDIUM / TOUGH:
+
+Get sitewise count of the "last site worked on" by each employee
+
+Result (Explanation - 7721 was the last site worked on by Geet & Gautham, 1345 was the last site worked on by Gangamma):
+last_site_id| count
+7721        | 2
+1345        | 1
+
+
+
+LEVEL - TOUGH:
+
+Write a query to get number of days between every work order each employee started e.g.
+
+Result:
+---------|-----------------------|---------|
+employee | work_order_start_time | daydiff |
+---------|-----------------------|---------|
+Gangamma | 2020-01-11 13:30:10   | 0       | (OR NULL)
+Gangamma | 2020-01-21 21:20:52   | 10      |
+Gangamma | 2020-01-31 09:30:22   | 10      |
+Gautham  | 2020-01-01 21:20:52   | 0       | (OR NULL)
+Gautham  | 2020-01-02 13:30:10   | 1       |
+Gautham  | 2020-01-16 09:30:22   | 14      |
+Geet     | 2020-01-01 23:30:12   | 0       | (OR NULL)
+Geet     | 2020-01-05 13:30:10   | 4       |
+Geet     | 2020-01-05 21:20:52   | 0       |
+Geet     | 2020-01-10 09:30:22   | 5       |
+---------|-----------------------|---------|
+
+
+
+
+
+
+
+
+
+**************************************** ANSWERS *********************************************
+
+LEVEL - VERY EASY:
+
+Write a query to get a list of customers, who have started more than 3 work orders.
+
+"""
+SELECT employee, count(*) as work_order_count
+FROM employees
+GROUP BY employee
+HAVING count(*) > 3;
+"""
+
+
+Result:
+employee| work_order_count
+Geet    | 3
+
+
+
+LEVEL - EASY:
+
+Write a query to find the percentage share of work_orders started by each employee in Jan 2020.
+
+"""
+SELECT 
+    e.employee as employee,
+    (e.work_orders / tot.total_work_orders) as work_order_share
+
+FROM
+    (SELECT employee, count(*) as work_orders
+    FROM employees
+    WHERE year(work_order_start_time) = 2020 and month(work_order_start_time) = 1
+    GROUP BY employee) e
+
+CROSS JOIN
+    (SELECT count(*) as total_work_orders 
+    FROM employees
+    WHERE year(work_order_start_time) = 2020 and month(work_order_start_time) = 1) tot;
+"""
+
+Result:
+employee | work_order_share
+Geet     | 0.4
+Gautham  | 0.3
+Gangamma | 0.3
+
+
+
+
+LEVEL - MEDIUM / TOUGH:
+
+Get sitewise count of the "last site worked on" by each employee
+
+"""
+SELECT 
+    lst_id.site_id as last_site_id,
+    count(*) as total_count
+
+FROM
+    (SELECT 
+        e.employee as employee,
+        e.site_id as site_id
+    FROM employees e
+    INNER JOIN
+        (SELECT employee, max(work_order_start_time) as lwost
+        FROM employees
+        GROUP BY employee) le
+    ON e.employee = le.employee and e.work_order_start_time = le.lwost
+    ) lst_id
+
+GROUP BY lst_id.site_id;
+"""
+
+Result (Explanation - 7721 was the last site worked on by Geet & Gautham, 1345 was the last site worked on by Gangamma):
+last_site_id| total_count
+7721        | 2
+1345        | 1
+
+
+
+
+LEVEL - TOUGH:
+
+Write a query to get number of days between every work order each employee started e.g.
+SOURCE: [https://stackoverflow.com/questions/41498534/mysql-time-difference-in-consecutive-rows-with-hierarchical-data]
+
+"""
+SELECT 
+	a.employee as employee,
+    a.work_order_start_time as work_order_start_time,
+    datediff(a.work_order_start_time, a.prev_time) as daydiff
+FROM
+	(select e.*,
+		   (select e2.work_order_start_time
+			from employees e2
+			where e2.employee = e2.employee
+                and e2.work_order_start_time < e.work_order_start_time
+			order by e2.work_order_start_time desc
+			limit 1
+		   ) as prev_time
+	from employees e
+	) a
+ORDER BY a.employee, a.work_order_start_time;
+"""
+
+Result:
+---------|-----------------------|---------|
+employee | work_order_start_time | daydiff |
+---------|-----------------------|---------|
+Gangamma | 2020-01-11 13:30:10   | 0       | (OR NULL)
+Gangamma | 2020-01-21 21:20:52   | 10      |
+Gangamma | 2020-01-31 09:30:22   | 10      |
+Gautham  | 2020-01-01 21:20:52   | 0       | (OR NULL)
+Gautham  | 2020-01-02 13:30:10   | 1       |
+Gautham  | 2020-01-16 09:30:22   | 14      |
+Geet     | 2020-01-01 23:30:12   | 0       | (OR NULL)
+Geet     | 2020-01-05 13:30:10   | 4       |
+Geet     | 2020-01-05 21:20:52   | 0       |
+Geet     | 2020-01-10 09:30:22   | 5       |
+---------|-----------------------|---------|
+
+
+
