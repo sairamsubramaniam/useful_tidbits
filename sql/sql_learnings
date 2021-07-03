@@ -1,0 +1,3 @@
+1) Suppose there are two columns - region and id and your query wants to count(distinct id) grouped by region.
+If the id columns has nulls, then region will not be grouped properly!!
+But when you filter only by 

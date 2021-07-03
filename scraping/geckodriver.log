@@ -1,0 +1,11 @@
+1600708656859	geckodriver	INFO	Listening on 127.0.0.1:44637
+1600708656945	mozrunner::runner	INFO	Running command: "/usr/bin/firefox" "--marionette" "-foreground" "-no-remote" "-profile" "/tmp/rust_mozprofilecVLTNv"
+Fontconfig error: Cannot load default config file
+Fontconfig error: Cannot load default config file
+Fontconfig error: Cannot load default config file
+console.error: SearchCache: "_readCacheFile: Error reading cache file:" (new Error("", "(unknown module)"))
+Fontconfig error: Cannot load default config file
+1600708667465	Marionette	INFO	Listening on port 39443
+1600708667498	Marionette	WARN	TLS certificate errors will be ignored for this session
+JavaScript error: resource://gre/actors/AutoCompleteChild.jsm, line 208: Error: Invalid autocomplete selectedIndex
+1600708669712	Marionette	INFO	Stopped listening on port 39443
